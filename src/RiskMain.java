@@ -1,37 +1,63 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
 
 public class RiskMain extends JPanel {
-    private static int WIDTH, HEIGHT;
-    private RiskMenu menuPanel;
+    public static int width = 1600, height = 900;
 
-    public RiskMain(){
-
+    public RiskMain(int width, int height) {
+        setSize(width, height);
+        setupMouseListener();
     }
 
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.setColor(Color.red);
-        g2.fillRect(50,50,200,200);
-        menuPanel.draw(g2);
+        g2.setColor(Color.RED);
+        g2.fillRect(50,50,500,500);
+    }
+
+    public void setupMouseListener(){
+        addMouseListener(new MouseListener() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {}
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
+            }
+        });
     }
 
     public static void main(String[] args) {
-        WIDTH = 1600;
-        HEIGHT = 900;
+        JFrame window = new JFrame("RISK");
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setBounds(0, 0, 1600, 900); //(x, y, w, h) 22 due to title bar.
 
-        JFrame frame = new JFrame("Risk");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        JPanel menuPanel = new RiskMenu(WIDTH, HEIGHT);
+        RiskMain panel = new RiskMain(WIDTH, HEIGHT);
 
+        panel.setFocusable(true);
+        panel.grabFocus();
 
-
-        frame.setSize(WIDTH, HEIGHT+24);
-        frame.setVisible(true);
-
-        frame.add(menuPanel);
-        menuPanel.setFocusable(true);
-        menuPanel.grabFocus();
-
+        window.add(panel);
+        window.setVisible(true);
+        window.setResizable(false);
     }
 }
