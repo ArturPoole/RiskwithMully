@@ -12,9 +12,9 @@ public class Player {
             while (numOfTroops <= 0){
                 return false;
             }
+            System.out.println("TESt");
 
             return true;
-
         }
 
 }
