@@ -5,41 +5,80 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 
 
 public class RiskMain extends JPanel {
     public static int WIDTH = 1440, HEIGHT = 900;
-    private BufferedImage worldMapBackground;
-    private boolean startMenu;
+    private BufferedImage worldMapBackground, riskMap, bottomBar;
+    private boolean startMenu, setUp;
     private JButton startButton;
+    private ArrayList players;
+    private Color[] playerColors;
 
     public RiskMain(int width, int height) {
         setSize(width, height);
         setupImages();
         setupMouseListener();
-
         startMenu = true;
+
         setLayout(null);
-        JButton startButton = new JButton("Start Game");
-        add(startButton);
+        startButton = new JButton("");
         startButton.setBounds(width/2-50, height/2-25, 100 ,50);
         startButton.addActionListener( e -> start() );
+        startButton.setOpaque(false);
+        startButton.setContentAreaFilled(false);
+        startButton.setBorderPainted(false);
+        add(startButton);
+
 
 
     }
 
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-        g2.drawImage(worldMapBackground, 0, 0, null);
 
         if (startMenu) {
+            g2.drawImage(worldMapBackground, 0, 0, null);
+            g2.setColor(new Color(40, 40, 40, 240));
+            g2.fillRect(WIDTH/2-50, HEIGHT/2-25, 100 ,50);
+            g2.setColor(Color.RED);
+            g2.drawRect(WIDTH/2-50, HEIGHT/2-25, 100 ,50);
+            g2.drawString("START GAME", WIDTH/2-40, HEIGHT/2);
 
         }
+
+        if (setUp) {
+            g2.drawImage(riskMap,0, 0, null );
+            g2.drawImage(bottomBar, 0, 700, null);
+
+
+//            Color gray = new Color(40, 40, 40);
+//            g2.setColor(gray);
+//            g2.fillRect();
+        }
+
     }
 
     public void start(){
         System.out.println("HI");
         remove(startButton);
+        revalidate();
+        repaint();
+        startMenu = false;
+        setUp = true;
+    }
+
+    public void addPlayer() {
+        playerColors = new Color[6];
+        playerColors[0] = new Color(255, 0, 0);
+        playerColors[1] = new Color(0, 0, 255);
+        playerColors[2] = new Color(0, 255, 0);
+        playerColors[3] = new Color(222, 255, 0);
+        playerColors[4] = new Color(0, 0 , 0);
+        playerColors[5] = new Color(252, 0, 255);
+
+
 
     }
 
@@ -79,6 +118,19 @@ public class RiskMain extends JPanel {
         }catch(Exception e){
             e.printStackTrace();
         }
+
+        try{
+            riskMap = ImageIO.read(new File("res/RiskMap1.jpg"));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        try{
+            bottomBar = ImageIO.read(new File("res/bottomBar.jpg"));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
     }
 
     public static void main(String[] args) {
