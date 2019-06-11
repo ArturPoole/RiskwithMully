@@ -13,7 +13,8 @@ public class RiskMain extends JPanel {
     private BufferedImage worldMapBackground, riskMap, bottomBar;
     private boolean startMenu, setUp;
     private JButton startButton;
-    private ArrayList players;
+    private Player[] players;
+    private Country[] countries;
     private Color[] playerColors;
 
     public RiskMain(int width, int height) {
@@ -21,7 +22,6 @@ public class RiskMain extends JPanel {
         setupImages();
         setupMouseListener();
         startMenu = true;
-
         setLayout(null);
         startButton = new JButton("");
         startButton.setBounds(width/2-50, height/2-25, 100 ,50);
@@ -31,7 +31,8 @@ public class RiskMain extends JPanel {
         startButton.setBorderPainted(false);
         add(startButton);
 
-
+        countries = new Country[25];
+        setupCountries();
 
     }
 
@@ -52,11 +53,13 @@ public class RiskMain extends JPanel {
             g2.drawImage(riskMap,0, 0, null );
             g2.drawImage(bottomBar, 0, 700, null);
 
+            countries[0].draw(g2);
 
 //            Color gray = new Color(40, 40, 40);
 //            g2.setColor(gray);
 //            g2.fillRect();
         }
+
 
     }
 
@@ -82,6 +85,31 @@ public class RiskMain extends JPanel {
 
     }
 
+    public void setupCountries() {
+
+        Point[] cords = new Point[8];
+        cords[0] = new Point(98, 383);
+        cords[1] = new Point(168, 406);
+        cords[2] = new Point(79, 524);
+        cords[3] = new Point(115, 568);
+        cords[4] = new Point(267, 563);
+        cords[5] = new Point(348, 502);
+        cords[6] = new Point(422, 456);
+        cords[7] = new Point(138, 360);
+        countries[0] = new Country("Spain", cords); // Spain
+
+//        Point[] cords = new Point[8];
+//        cords[0] = new Point(98, 383);
+//        cords[1] = new Point(168, 406);
+//        cords[2] = new Point(79, 524);
+//        cords[3] = new Point(115, 568);
+//        cords[4] = new Point(267, 563);
+//        cords[5] = new Point(337, 491);
+//        cords[6] = new Point(422, 456);
+//        cords[7] = new Point(138, 360);
+//        countries[0] = new Country("Spain", cords);
+
+    }
     public void setupMouseListener(){
         addMouseListener(new MouseListener() {
 
@@ -90,6 +118,8 @@ public class RiskMain extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (countries[0].isClicked(new Point(e.getX(), e.getY())))
+                    System.out.println("YEET");
 
             }
 
