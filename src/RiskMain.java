@@ -90,8 +90,8 @@ public class RiskMain extends JPanel {
     }
 
     public void setupCountries() {
-        ArrayList<Point> cords = new ArrayList<>();
 
+        ArrayList<Point> cords = new ArrayList<>();
         cords.add(new Point(98, 383));
         cords.add(new Point(168, 406));
         cords.add(new Point(79, 524));
@@ -119,6 +119,20 @@ public class RiskMain extends JPanel {
         cords.add(new Point(0, 692));
         countries[2] = new Country("Morocco", cords); // Morocco
 
+        cords = new ArrayList<>();
+        cords.add(new Point(209, 616));
+        cords.add(new Point(538, 616));
+        cords.add(new Point(486, 692));
+        cords.add(new Point(209, 692));
+        countries[3] = new Country("Algeria", cords); // Algeria
+
+        cords = new ArrayList<>();
+        cords.add(new Point(509, 692));
+        cords.add(new Point(602, 692));
+        cords.add(new Point(632, 625));
+        cords.add(new Point(546, 625));
+        countries[4] = new Country("Tunisia", cords); // Tunisia
+
 
 
 
@@ -133,9 +147,12 @@ public class RiskMain extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (countries[0].isClicked(new Point(e.getX(), e.getY())))
-                    System.out.println("YEET");
-
+                for (Country c: countries) {
+                    if (c != null) {
+                        if (c.isClicked(new Point(e.getX(), e.getY())))
+                            System.out.println(c.getName());
+                    }
+                }
             }
 
             @Override

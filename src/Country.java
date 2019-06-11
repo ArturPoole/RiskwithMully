@@ -9,6 +9,7 @@ public class Country {
 
     public Country(String tag, ArrayList<Point> cords) {
         points = cords;
+        name = tag;
 
         x = new int[cords.size()];
         y = new int[cords.size()];
