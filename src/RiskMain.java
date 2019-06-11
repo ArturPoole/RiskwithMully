@@ -53,9 +53,11 @@ public class RiskMain extends JPanel {
         if (setUp) {
             g2.drawImage(riskMap,0, 0, null );
             g2.drawImage(bottomBar, 0, 700, null);
+            for (Country c: countries) {
+                if (c != null)
+                    c.draw(g2);
+            }
 
-            countries[0].draw(g2);
-            countries[1].draw(g2);
 
 //            Color gray = new Color(40, 40, 40);
 //            g2.setColor(gray);
@@ -101,13 +103,21 @@ public class RiskMain extends JPanel {
         countries[0] = new Country("Spain", cords); // Spain
 
         cords = new ArrayList<>();
-
         cords.add(new Point(73, 521));
         cords.add(new Point(159, 404));
         cords.add(new Point(90, 387));
         cords.add(new Point(14, 521));
-        countries[1] = new Country("Portugal", cords); // Spain
+        countries[1] = new Country("Portugal", cords); // Portugal
 
+        cords = new ArrayList<>();
+        cords.add(new Point(0, 621));
+        cords.add(new Point(83, 594));
+        cords.add(new Point(132, 613));
+        cords.add(new Point(214, 622));
+        cords.add(new Point(214, 675));
+        cords.add(new Point(149, 692));
+        cords.add(new Point(0, 692));
+        countries[2] = new Country("Morocco", cords); // Morocco
 
 
 
