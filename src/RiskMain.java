@@ -21,6 +21,7 @@ public class RiskMain extends JPanel {
         setSize(width, height);
         setupImages();
         setupMouseListener();
+
         startMenu = true;
         setLayout(null);
         startButton = new JButton("");
@@ -29,9 +30,9 @@ public class RiskMain extends JPanel {
         startButton.setOpaque(false);
         startButton.setContentAreaFilled(false);
         startButton.setBorderPainted(false);
-        add(startButton);
+        add(startButton);                                       // START BUTTON
 
-        countries = new Country[25];
+        countries = new Country[25];                            // ALL COUNTRIES
         setupCountries();
 
     }
@@ -86,28 +87,24 @@ public class RiskMain extends JPanel {
     }
 
     public void setupCountries() {
+        ArrayList<Point> cords = new ArrayList<>();
 
-        Point[] cords = new Point[8];
-        cords[0] = new Point(98, 383);
-        cords[1] = new Point(168, 406);
-        cords[2] = new Point(79, 524);
-        cords[3] = new Point(115, 568);
-        cords[4] = new Point(267, 563);
-        cords[5] = new Point(348, 502);
-        cords[6] = new Point(422, 456);
-        cords[7] = new Point(138, 360);
+        cords.add(new Point(98, 383));
+        cords.add(new Point(168, 406));
+        cords.add(new Point(79, 524));
+        cords.add(new Point(115, 568));
+        cords.add(new Point(267, 563));
+        cords.add(new Point(348, 502));
+        cords.add(new Point(422, 456));
+        cords.add(new Point(138, 360));
+        for (int i = 0; i < cords.size(); i++) {
+            System.out.println(cords.get(i));
+        }
         countries[0] = new Country("Spain", cords); // Spain
 
-//        Point[] cords = new Point[8];
-//        cords[0] = new Point(98, 383);
-//        cords[1] = new Point(168, 406);
-//        cords[2] = new Point(79, 524);
-//        cords[3] = new Point(115, 568);
-//        cords[4] = new Point(267, 563);
-//        cords[5] = new Point(337, 491);
-//        cords[6] = new Point(422, 456);
-//        cords[7] = new Point(138, 360);
-//        countries[0] = new Country("Spain", cords);
+
+
+
 
     }
     public void setupMouseListener(){
