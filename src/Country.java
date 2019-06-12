@@ -25,7 +25,11 @@ public class Country {
     }
 
     public void draw(Graphics2D g2) {
-        g2.setColor(Color.RED);
+        int r = (int)(Math.random()*255);
+        int g = (int)(Math.random()*255);
+        int b = (int)(Math.random()*255);
+
+        g2.setColor(new Color(r, g, b));
         aura = new Polygon(x, y, points.size());
         g2.fill(aura);
 
