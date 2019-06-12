@@ -289,9 +289,52 @@ public class RiskMain extends JPanel {
         cords.add(new Point(1132, 495));
         cords.add(new Point(1128, 464));
         cords.add(new Point(984, 451));
-
         cords.add(new Point(996, 518));
-        countries[19] = new Country("Bulgaria", cords);
+        countries[19] = new Country("Bulgaria", cords); //Bulgaria
+
+        cords = new ArrayList<>();
+        cords.add(new Point(986, 446));
+        cords.add(new Point(1089, 446));
+        cords.add(new Point(1149, 469));
+        cords.add(new Point(1136, 404));
+        cords.add(new Point(1082, 347));
+        cords.add(new Point(1063, 347));
+        cords.add(new Point(1067, 413));
+        cords.add(new Point(983, 420));
+        countries[20] = new Country("Romania", cords); //Romania
+
+        cords = new ArrayList<>();
+        cords.add(new Point(653, 138));
+        cords.add(new Point(653, 108));
+        cords.add(new Point(709, 76));
+        cords.add(new Point(697, 135));
+        countries[21] = new Country("Denmark", cords); //Denmark
+
+        cords = new ArrayList<>();
+        cords.add(new Point(592, 0));
+        cords.add(new Point(643, 70));
+        cords.add(new Point(737, 46));
+        cords.add(new Point(769, 0));
+        countries[22] = new Country("Norway", cords); //Norway
+
+        cords = new ArrayList<>();
+        cords.add(new Point(737, 52));
+        cords.add(new Point(754, 147));
+        cords.add(new Point(814, 133));
+        cords.add(new Point(850, 0));
+        cords.add(new Point(776, 0));
+        cords.add(new Point(769, 28));
+        countries[23] = new Country("Finland", cords); //Finland
+
+        cords = new ArrayList<>();
+        cords.add(new Point(1080, 535));
+        cords.add(new Point(1133, 497));
+        cords.add(new Point(1433, 490));
+        cords.add(new Point(1437, 697));
+        cords.add(new Point(1194, 654));
+        countries[24] = new Country("Finland", cords); //Finland
+
+
 
 
 
