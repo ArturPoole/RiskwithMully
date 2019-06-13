@@ -16,6 +16,7 @@ public class RiskMain extends JPanel {
     private ArrayList<Player> players;
     private Country[] countries;
     private Player activePlayer;
+    private Country focused, target;
     private int turnCounter;
 
     public RiskMain(int width, int height) {
@@ -77,6 +78,7 @@ public class RiskMain extends JPanel {
         if (deployRound) {
             if (players.get(players.size() - 1).getRemainingRenforcements() < 1) {
                 deployRound = false;
+                activePlayer.setRemainingRenforcements(activePlayer.getTroopGain());
                 gameOn = true;
                 reinforcing = true;
                 attacking = false;
@@ -123,11 +125,13 @@ public class RiskMain extends JPanel {
 
 
         if (!startMenu) {
+            g2.drawImage(riskMap,0, 0, null );
             for (Country c : countries) {
                 if (c != null)
                     c.draw(g2);
             }
         }
+
         repaint();
     }
 
@@ -198,31 +202,44 @@ public class RiskMain extends JPanel {
                 nextPlayer();
             }
         }
+
         if (gameOn) {
             if (reinforcing) {
-                if (c.getOwner() == activePlayer) {
+                if (c.getOwner() == activePlayer && c.getOwner().getRemainingRenforcements() > 0) {
                     c.setTroops(c.getTroops() + 1);
                     activePlayer.setRemainingRenforcements(activePlayer.getRemainingRenforcements() - 1);
                 }
             }
-
         }
-
     }
 
-    public void attack(Country focus, Country target) {
-        if (focus.getTroops() < target.getTroops()) {
-            focus.setTroops(1);
-            target.setTroops(target.getTroops() - focus.getTroops() + 1);
-        }
-        if (focus.getTroops() == target.getTroops()) {
-            focus.setTroops(1);
+    public void attack() {
+        if (focused.getTroops() < target.getTroops()) {
+            System.out.println("1");
+            focused.setTroops(1);
+            target.setTroops(target.getTroops() - focused.getTroops() + 1);
+        } else if (focused.getTroops() == target.getTroops()) {
+            System.out.println("2");
+            focused.setTroops(1);
             target.setTroops(1);
+        } else if (focused.getTroops() > target.getTroops()) {
+            System.out.println("3");
+            target.setOwner(activePlayer);
+            target.setTroops((focused.getTroops() - target.getTroops()) - 1);
+            focused.setTroops(1);
         }
-        if (focus.getTroops() > target.getTroops()) {
-            focus.setTroops(1);
-            target.setTroops((focus.getTroops() - target.getTroops()) - 1);
+
+        if (!target.getOwner().isAlive()) {
+            for (Player p : players) {
+                if (p == activePlayer) { players.remove(p); }
+            }
+
+            System.out.println(players.size());
         }
+
+        focused = null;
+        target = null;
+
 
     }
 
@@ -501,10 +518,7 @@ public class RiskMain extends JPanel {
 
                             if (deployRound || reinforcing) {
                                 deploy(c);
-                            } else if (attacking) {
-
                             }
-
                         }
                     }
                 }
@@ -514,18 +528,50 @@ public class RiskMain extends JPanel {
                     int y = e.getY();
                     if (y > 750 && y < 850) {
                         if (x > 200 && x < 450) {
-                            if (activePlayer.getRemainingRenforcements() < 1) {
+                            if (activePlayer.getRemainingRenforcements() < 1 && !fortifying) {
                                 reinforcing = false;
                                 attacking = true;
                             }
-                        } else if (x > 546 && x < 796) {
+                        } else if (x > 546 && x < 796 && !reinforcing) {
                             attacking = false;
                             fortifying = true;
-                        } else if (x > 892 && x < 1142) {
+                        } else if (x > 892 && x < 1142 && !attacking) {
                             fortifying = false;
+                            reinforcing = true;
                             nextPlayer();
                         }
                     }
+                }
+
+                if (attacking) {
+                    if (focused == null) {
+
+                        for (Country c : countries) {
+                            if (c != null && c.getOwner() == activePlayer) {
+                                if (c.isClicked(new Point(e.getX(), e.getY()))) {
+                                    focused = c;
+                                    System.out.println(focused);
+
+                                }
+                            }
+                        }
+                    }
+
+                    if (focused != null) {
+                        for (Country c : countries) {
+                            if (c != null && c.getOwner() != activePlayer) {
+                                if (c.isClicked(new Point(e.getX(), e.getY()))) {
+                                    target = c;
+                                    System.out.println(target);
+                                }
+                            }
+                        }
+
+                        if (focused != null && target != null)
+                            attack();
+                    }
+
+
 
                 }
 

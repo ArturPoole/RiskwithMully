@@ -12,7 +12,7 @@ public class Player {
 
 
 
-    public boolean isAlive(int numOfTroops){
+    public boolean isAlive(){
 
         while (numOfTroops <= 0){
             return false;
@@ -54,7 +54,7 @@ public class Player {
     }
 
     public void setRemainingRenforcements(int r) {
-         remainingRenforcements = r;
+        remainingRenforcements = r;
     }
 
     public boolean isDefending() {
