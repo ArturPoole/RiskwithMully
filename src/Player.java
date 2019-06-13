@@ -1,13 +1,14 @@
+import java.awt.*;
+
 public class Player {
+    private int numOfTroops = 0;
+    private int troopGain = 2;
+    private int remainingRenforcements = 1;
+    private boolean isDefending = true, active = false;
+    private Color color;
 
 
-    private int numOfTroops = 1;
-    private int troopGain = 0;
-    private int remainingRenforcements = 21;
-    private boolean isDefending = true, isActive = false;
-
-
-    public Player() {}
+    public Player() { }
 
 
 
@@ -20,9 +21,16 @@ public class Player {
         return true;
     }
 
+    public void setColor(Color c) {
+        color = c;
+    }
+
+    public Color getColor() {
+        return color;
+    }
 
     public void setActive() {
-        isActive = !isActive;
+        active = !active;
     }
 
     public int getNumOfTroops() {
@@ -45,8 +53,8 @@ public class Player {
         return remainingRenforcements;
     }
 
-    public int setRemainingRenforcements() {
-        return remainingRenforcements;
+    public void setRemainingRenforcements(int r) {
+         remainingRenforcements = r;
     }
 
     public boolean isDefending() {
@@ -56,6 +64,10 @@ public class Player {
     public void setDefending(boolean defending) {
         isDefending = defending;
     }
+
+    public boolean getActive() {return active;}
+
+    public void setActive(boolean b) {active = b;}
 
 
 }

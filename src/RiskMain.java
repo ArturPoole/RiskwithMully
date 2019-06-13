@@ -11,17 +11,20 @@ import java.util.ArrayList;
 public class RiskMain extends JPanel {
     public static int WIDTH = 1440, HEIGHT = 900;
     private BufferedImage worldMapBackground, riskMap, bottomBar;
-    private boolean startMenu, setUp;
+    private boolean startMenu, setUp, deployRound, gameOn, reinforcing, attacking, fortifying;
     private JButton startButton;
-    private Player[] players;
+    private ArrayList<Player> players;
     private Country[] countries;
-    private Color[] playerColors;
+    private Player activePlayer;
+    private int turnCounter;
 
     public RiskMain(int width, int height) {
         setSize(width, height);
         setupImages();
         setupMouseListener();
 
+
+        turnCounter = 0;
         startMenu = true;
         setLayout(null);
         startButton = new JButton("");
@@ -51,24 +54,84 @@ public class RiskMain extends JPanel {
         }
 
         if (setUp) {
+            reinforcing = false;
+            attacking = false;
+            fortifying = false;
+
+
+
+            players = new ArrayList<>();
             g2.drawImage(riskMap,0, 0, null );
             g2.drawImage(bottomBar, 0, 700, null);
-            for (Country c: countries) {
-                if (c != null)
-                    c.draw(g2);
+
+
+            for (int i = 0; i < 6; i++) {
+                g2.setColor(Color.GRAY);
+                g2.fillRect(WIDTH/5 + (i * 150), 775, 100, 50);
+                g2.setColor(Color.WHITE);
+                g2.drawString(i+1 + " player", WIDTH/5 + 25 + (i * 150), 800);
+            }
+
+        }
+
+        if (deployRound) {
+            if (players.get(players.size() - 1).getRemainingRenforcements() < 1) {
+                deployRound = false;
+                gameOn = true;
+                reinforcing = true;
+                attacking = false;
+                fortifying = false;
             }
 
 
-//            Color gray = new Color(40, 40, 40);
-//            g2.setColor(gray);
-//            g2.fillRect();
+            g2.drawImage(bottomBar, 0, 700, null);
+
+        }
+
+        if (gameOn) {
+
+            if (reinforcing) {
+                g2.setColor(Color.RED);
+            } else {
+                g2.setColor(new Color(40, 40,40, 250));
+
+            }
+            g2.fillRect(200, 750, 250, 100);
+
+            if (attacking) {
+                g2.setColor(Color.RED);
+            } else {
+                g2.setColor(new Color(40, 40,40, 250));
+
+            }
+            g2.fillRect(546, 750, 250, 100);
+
+            if (fortifying) {
+                g2.setColor(Color.RED);
+            } else {
+                g2.setColor(new Color(40, 40,40, 250));
+
+            }
+            g2.fillRect(892, 750, 250, 100);
+
+            g2.setColor(Color.RED);
+            g2.drawRect(200, 750, 250, 100);
+            g2.drawRect(546, 750, 250, 100);
+            g2.drawRect(892, 750, 250, 100);
         }
 
 
+
+        if (!startMenu) {
+            for (Country c : countries) {
+                if (c != null)
+                    c.draw(g2);
+            }
+        }
+        repaint();
     }
 
     public void start(){
-        System.out.println("HI");
         remove(startButton);
         revalidate();
         repaint();
@@ -76,8 +139,36 @@ public class RiskMain extends JPanel {
         setUp = true;
     }
 
-    public void addPlayer() {
-        playerColors = new Color[6];
+    public void nextPlayer() {
+        activePlayer.setActive();
+
+        for (int i = 0; i < players.size(); i++) {
+            if (turnCounter < players.size())
+                turnCounter = players.indexOf(activePlayer) + 1;
+            else
+                turnCounter = 0;
+            if (turnCounter == players.size())
+                turnCounter = 0;
+        }
+
+        if (players.size() > 1 ) {
+            if (turnCounter < players.size())
+                activePlayer = players.get(turnCounter);
+            else
+                activePlayer = players.get(turnCounter-1);
+
+
+        } else activePlayer = players.get(0);
+
+        if (gameOn) {
+            activePlayer.setRemainingRenforcements(activePlayer.getTroopGain());
+        }
+    }
+
+
+
+    public void addPlayer(int nu) {
+        Color[] playerColors = new Color[6];
         playerColors[0] = new Color(255, 0, 0);
         playerColors[1] = new Color(0, 0, 255);
         playerColors[2] = new Color(0, 255, 0);
@@ -85,7 +176,53 @@ public class RiskMain extends JPanel {
         playerColors[4] = new Color(0, 0 , 0);
         playerColors[5] = new Color(252, 0, 255);
 
+        for (int i = 0; i < nu; i++) {
+            players.add(new Player());
+            players.get(i).setColor(playerColors[i]);
+        }
 
+        setUp = false;
+        deployRound = true;
+
+        players.get(0).setActive();
+        activePlayer = players.get(0);
+
+    }
+
+    public void deploy(Country c) {
+        if (deployRound) {
+            if (c.getOwner() == null || c.getOwner() == activePlayer) {
+                c.setOwner(activePlayer);
+                c.setTroops(c.getTroops() + 1);
+                activePlayer.setRemainingRenforcements(activePlayer.getRemainingRenforcements() - 1);
+                nextPlayer();
+            }
+        }
+        if (gameOn) {
+            if (reinforcing) {
+                if (c.getOwner() == activePlayer) {
+                    c.setTroops(c.getTroops() + 1);
+                    activePlayer.setRemainingRenforcements(activePlayer.getRemainingRenforcements() - 1);
+                }
+            }
+
+        }
+
+    }
+
+    public void attack(Country focus, Country target) {
+        if (focus.getTroops() < target.getTroops()) {
+            focus.setTroops(1);
+            target.setTroops(target.getTroops() - focus.getTroops() + 1);
+        }
+        if (focus.getTroops() == target.getTroops()) {
+            focus.setTroops(1);
+            target.setTroops(1);
+        }
+        if (focus.getTroops() > target.getTroops()) {
+            focus.setTroops(1);
+            target.setTroops((focus.getTroops() - target.getTroops()) - 1);
+        }
 
     }
 
@@ -324,7 +461,7 @@ public class RiskMain extends JPanel {
         cords.add(new Point(850, 0));
         cords.add(new Point(776, 0));
         cords.add(new Point(769, 28));
-        countries[23] = new Country("Finland", cords); //Finland
+        countries[23] = new Country("Sweden", cords); // Sweden
 
         cords = new ArrayList<>();
         cords.add(new Point(1080, 535));
@@ -332,13 +469,14 @@ public class RiskMain extends JPanel {
         cords.add(new Point(1433, 490));
         cords.add(new Point(1437, 697));
         cords.add(new Point(1194, 654));
-        countries[24] = new Country("Finland", cords); //Finland
+        countries[24] = new Country("Turkey", cords); // Turkey
 
 
 
 
 
     }
+
     public void setupMouseListener(){
         addMouseListener(new MouseListener() {
 
@@ -347,12 +485,53 @@ public class RiskMain extends JPanel {
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                for (Country c: countries) {
-                    if (c != null) {
-                        if (c.isClicked(new Point(e.getX(), e.getY())))
-                            System.out.println(c.getName());
+
+                if (setUp) {
+                    for (int i = 0; i < 6; i++) {
+                        if (e.getY() > 775 && e.getY() < 825) {
+                            if (e.getX() > WIDTH/5 + (i * 150) && e.getX() < WIDTH/5 + (i * 150) + 100)
+                                addPlayer(i + 1);
+                        }
                     }
                 }
+
+                for (Country c: countries) {
+                    if (c != null) {
+                        if (c.isClicked(new Point(e.getX(), e.getY()))) {
+
+                            if (deployRound || reinforcing) {
+                                deploy(c);
+                            } else if (attacking) {
+
+                            }
+
+                        }
+                    }
+                }
+
+                if (gameOn) {
+                    int x = e.getX();
+                    int y = e.getY();
+                    if (y > 750 && y < 850) {
+                        if (x > 200 && x < 450) {
+                            if (activePlayer.getRemainingRenforcements() < 1) {
+                                reinforcing = false;
+                                attacking = true;
+                            }
+                        } else if (x > 546 && x < 796) {
+                            attacking = false;
+                            fortifying = true;
+                        } else if (x > 892 && x < 1142) {
+                            fortifying = false;
+                            nextPlayer();
+                        }
+                    }
+
+                }
+
+//                    g2.fillRect(892, 750, 250, 100);
+//                    g2.fillRect(200, 750, 250, 100);
+//                    g2.fillRect(546, 750, 250, 100);
             }
 
             @Override
