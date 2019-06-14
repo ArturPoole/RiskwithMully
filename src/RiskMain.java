@@ -6,7 +6,11 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-
+// TODO: 6/13/19 fix attack when focused has less than target
+// TODO: 6/13/19 Keep track of number of troops each country has
+// TODO: 6/13/19 setup win scenario
+// TODO: 6/13/19 draw text and finish ui
+ // TODO: 6/13/19 setup limitations on which countries can travel where
 
 public class RiskMain extends JPanel {
     public static int WIDTH = 1440, HEIGHT = 900;
@@ -17,13 +21,13 @@ public class RiskMain extends JPanel {
     private Country[] countries;
     private Player activePlayer;
     private Country focused, target;
+    private Region[] regions;
     private int turnCounter;
 
     public RiskMain(int width, int height) {
         setSize(width, height);
         setupImages();
         setupMouseListener();
-
 
         turnCounter = 0;
         startMenu = true;
@@ -44,15 +48,23 @@ public class RiskMain extends JPanel {
     public void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
+        g2.drawImage(riskMap, 0, 0, null);
+        g2.drawImage(bottomBar, 0, 700, null);
+        for (Country c : countries) {
+            if (c != null)
+                c.draw(g2);
+        }
+
         if (startMenu) {
             g2.drawImage(worldMapBackground, 0, 0, null);
             g2.setColor(new Color(40, 40, 40, 240));
-            g2.fillRect(WIDTH/2-50, HEIGHT/2-25, 100 ,50);
+            g2.fillRect(WIDTH / 2 - 50, HEIGHT / 2 - 25, 100, 50);
             g2.setColor(Color.RED);
-            g2.drawRect(WIDTH/2-50, HEIGHT/2-25, 100 ,50);
-            g2.drawString("START GAME", WIDTH/2-40, HEIGHT/2);
+            g2.drawRect(WIDTH / 2 - 50, HEIGHT / 2 - 25, 100, 50);
+            g2.drawString("START GAME", WIDTH / 2 - 40, HEIGHT / 2);
 
         }
+
 
         if (setUp) {
             reinforcing = false;
@@ -60,20 +72,20 @@ public class RiskMain extends JPanel {
             fortifying = false;
 
 
-
             players = new ArrayList<>();
-            g2.drawImage(riskMap,0, 0, null );
+            g2.drawImage(riskMap, 0, 0, null);
             g2.drawImage(bottomBar, 0, 700, null);
 
 
             for (int i = 0; i < 6; i++) {
                 g2.setColor(Color.GRAY);
-                g2.fillRect(WIDTH/5 + (i * 150), 775, 100, 50);
+                g2.fillRect(WIDTH / 5 + (i * 150), 775, 100, 50);
                 g2.setColor(Color.WHITE);
-                g2.drawString(i+1 + " player", WIDTH/5 + 25 + (i * 150), 800);
+                g2.drawString(i + 1 + " player", WIDTH / 5 + 25 + (i * 150), 800);
             }
 
         }
+
 
         if (deployRound) {
             if (players.get(players.size() - 1).getRemainingRenforcements() < 1) {
@@ -86,8 +98,6 @@ public class RiskMain extends JPanel {
             }
 
 
-            g2.drawImage(bottomBar, 0, 700, null);
-
         }
 
         if (gameOn) {
@@ -95,7 +105,7 @@ public class RiskMain extends JPanel {
             if (reinforcing) {
                 g2.setColor(Color.RED);
             } else {
-                g2.setColor(new Color(40, 40,40, 250));
+                g2.setColor(new Color(40, 40, 40, 250));
 
             }
             g2.fillRect(200, 750, 250, 100);
@@ -103,7 +113,7 @@ public class RiskMain extends JPanel {
             if (attacking) {
                 g2.setColor(Color.RED);
             } else {
-                g2.setColor(new Color(40, 40,40, 250));
+                g2.setColor(new Color(40, 40, 40, 250));
 
             }
             g2.fillRect(546, 750, 250, 100);
@@ -111,7 +121,7 @@ public class RiskMain extends JPanel {
             if (fortifying) {
                 g2.setColor(Color.RED);
             } else {
-                g2.setColor(new Color(40, 40,40, 250));
+                g2.setColor(new Color(40, 40, 40, 250));
 
             }
             g2.fillRect(892, 750, 250, 100);
@@ -120,16 +130,19 @@ public class RiskMain extends JPanel {
             g2.drawRect(200, 750, 250, 100);
             g2.drawRect(546, 750, 250, 100);
             g2.drawRect(892, 750, 250, 100);
+
+            g2.setColor(new Color(40, 40, 40, 255));
+            g2.fillRect(30, 50, 60, 100);
+
+            g2.setColor(Color.WHITE);
+            g2.drawString("Troop Gain: " + activePlayer.getTroopGain(), 32, 110);
+
         }
 
 
-
-        if (!startMenu) {
-            g2.drawImage(riskMap,0, 0, null );
-            for (Country c : countries) {
-                if (c != null)
-                    c.draw(g2);
-            }
+        if (activePlayer != null) {
+            g2.setColor(activePlayer.getColor());
+            g2.fillRect(40, 40, 40, 40);
         }
 
         repaint();
@@ -155,6 +168,7 @@ public class RiskMain extends JPanel {
                 turnCounter = 0;
         }
 
+
         if (players.size() > 1 ) {
             if (turnCounter < players.size())
                 activePlayer = players.get(turnCounter);
@@ -165,11 +179,22 @@ public class RiskMain extends JPanel {
         } else activePlayer = players.get(0);
 
         if (gameOn) {
+            checkTroopGain();
             activePlayer.setRemainingRenforcements(activePlayer.getTroopGain());
         }
     }
 
+    public void checkTroopGain() {
+        for (Region r : regions) {
+            if (r.checkOwner(activePlayer)) {
+                activePlayer.setOwnedRegions(r);
+            } else {
+                activePlayer.removeOwnedRegions(r);
+            }
+        }
+        activePlayer.getTroopGain();
 
+    }
 
     public void addPlayer(int nu) {
         Color[] playerColors = new Color[6];
@@ -199,6 +224,7 @@ public class RiskMain extends JPanel {
                 c.setOwner(activePlayer);
                 c.setTroops(c.getTroops() + 1);
                 activePlayer.setRemainingRenforcements(activePlayer.getRemainingRenforcements() - 1);
+                activePlayer.setNumOfTroops(activePlayer.getNumOfTroops() + 1);
                 nextPlayer();
             }
         }
@@ -208,33 +234,56 @@ public class RiskMain extends JPanel {
                 if (c.getOwner() == activePlayer && c.getOwner().getRemainingRenforcements() > 0) {
                     c.setTroops(c.getTroops() + 1);
                     activePlayer.setRemainingRenforcements(activePlayer.getRemainingRenforcements() - 1);
+                    activePlayer.setNumOfTroops(activePlayer.getNumOfTroops() + 1);
+
                 }
             }
         }
     }
 
-    public void attack() {
-        if (focused.getTroops() < target.getTroops()) {
-            System.out.println("1");
-            focused.setTroops(1);
-            target.setTroops(target.getTroops() - focused.getTroops() + 1);
-        } else if (focused.getTroops() == target.getTroops()) {
-            System.out.println("2");
-            focused.setTroops(1);
-            target.setTroops(1);
-        } else if (focused.getTroops() > target.getTroops()) {
-            System.out.println("3");
-            target.setOwner(activePlayer);
-            target.setTroops((focused.getTroops() - target.getTroops()) - 1);
+    public void fortify() {
+        System.out.println(target);
+        if (focused.getTroops() > 1) {
+            target.setTroops(target.getTroops() + focused.getTroops() - 1);
             focused.setTroops(1);
         }
 
-        if (!target.getOwner().isAlive()) {
-            for (Player p : players) {
-                if (p == activePlayer) { players.remove(p); }
+
+    }
+
+    public void attack() {
+        Player defender = target.getOwner();
+
+        if (focused.getTroops() < target.getTroops()) {                         //Lose
+            focused.setTroops(1);
+            target.setTroops(target.getTroops() - focused.getTroops() + 1);
+        } else if (focused.getTroops() == target.getTroops()) {                 //Tie
+            focused.setTroops(1);
+            target.setTroops(1);
+        } else if (target.getTroops() == 0 && focused.getTroops() > 1) {
+            target.setOwner(activePlayer);
+            target.setTroops(focused.getTroops() - 1);
+            focused.setTroops(1);
+        } else if (focused.getTroops() == target.getTroops() + 1) {              //Destroy army but no advance
+            target.setTroops((focused.getTroops() - target.getTroops()) - 1);
+            focused.setTroops(1);
+        } else if (focused.getTroops() > target.getTroops()) {            //win
+            System.out.println("lkajdsf");
+            int focusedNu = focused.getTroops();
+            focused.setTroops(1);
+            target.setTroops((focusedNu - target.getTroops()) - 1);
+            target.setOwner(activePlayer);
+        }
+
+        if (defender != null) {
+            if (!defender.isAlive()) {
+                for (Player p : players) {
+                    if (p == defender) {
+                        players.remove(defender);
+                    }
+                }
             }
 
-            System.out.println(players.size());
         }
 
         focused = null;
@@ -393,20 +442,20 @@ public class RiskMain extends JPanel {
         cords.add(new Point(860, 553));
         countries[14] = new Country("Italy", cords);
 
-        cords = new ArrayList<>();                                  // Italy
-        cords.add(new Point(558, 390));
-        cords.add(new Point(651, 387));
-        cords.add(new Point(720, 402));
-        cords.add(new Point(687, 426));
-        cords.add(new Point(860, 553));
-        cords.add(new Point(787, 619));
-        cords.add(new Point(687, 618));
-        cords.add(new Point(687, 603));
-        cords.add(new Point(780, 599));
-        cords.add(new Point(783, 570));
-        cords.add(new Point(631, 451)); // 6
-        cords.add(new Point(570, 437)); // 5
-        countries[14] = new Country("Italy", cords);
+//        cords = new ArrayList<>();                                  // Italy
+//        cords.add(new Point(558, 390));
+//        cords.add(new Point(651, 387));
+//        cords.add(new Point(720, 402));
+//        cords.add(new Point(687, 426));
+//        cords.add(new Point(860, 553));
+//        cords.add(new Point(787, 619));
+//        cords.add(new Point(687, 618));
+//        cords.add(new Point(687, 603));
+//        cords.add(new Point(780, 599));
+//        cords.add(new Point(783, 570));
+//        cords.add(new Point(631, 451)); // 6
+//        cords.add(new Point(570, 437)); // 5
+//        countries[14] = new Country("Italy", cords);
 
         cords = new ArrayList<>();                                  // Montenegro
         cords.add(new Point(881, 505));
@@ -488,9 +537,50 @@ public class RiskMain extends JPanel {
         cords.add(new Point(1194, 654));
         countries[24] = new Country("Turkey", cords); // Turkey
 
+        regions = new Region[6];
 
+        ArrayList<Country> countryRegions = new ArrayList<>();
+        countryRegions.add(countries[0]);
+        countryRegions.add(countries[1]);
+        countryRegions.add(countries[2]);
+        countryRegions.add(countries[3]);
+        countryRegions.add(countries[4]);
+        regions[0] = new Region("Iberian Peninsula/Northern Africa", countryRegions, 4 );
 
+        countryRegions = new ArrayList<>();
+        countryRegions.add(countries[5]);
+        countryRegions.add(countries[6]);
+        countryRegions.add(countries[7]);
+        countryRegions.add(countries[8]);
+        countryRegions.add(countries[9]);
+        regions[1] = new Region("Western Europe", countryRegions, 4 );
 
+        countryRegions = new ArrayList<>();
+        countryRegions.add(countries[10]);
+        countryRegions.add(countries[12]);
+        countryRegions.add(countries[13]);
+        countryRegions.add(countries[14]);
+        regions[2] = new Region("Central Europe", countryRegions, 5 );
+
+        countryRegions = new ArrayList<>();
+        countryRegions.add(countries[15]);
+        countryRegions.add(countries[16]);
+        countryRegions.add(countries[17]);
+        countryRegions.add(countries[18]);
+        regions[3] = new Region("Slavic lands", countryRegions, 5 );
+
+        countryRegions = new ArrayList<>();
+        countryRegions.add(countries[19]);
+        countryRegions.add(countries[20]);
+        countryRegions.add(countries[24]);
+        regions[4] = new Region("Souther Eastern Europe", countryRegions, 5 );
+
+        countryRegions = new ArrayList<>();
+        countryRegions.add(countries[22]);
+        countryRegions.add(countries[23]);
+        countryRegions.add(countries[21]);
+        countryRegions.add(countries[11]);
+        regions[5] = new Region("North Eastern Europe", countryRegions, 5 );
 
     }
 
@@ -534,6 +624,8 @@ public class RiskMain extends JPanel {
                             }
                         } else if (x > 546 && x < 796 && !reinforcing) {
                             attacking = false;
+                            focused = null;
+                            target = null;
                             fortifying = true;
                         } else if (x > 892 && x < 1142 && !attacking) {
                             fortifying = false;
@@ -543,15 +635,12 @@ public class RiskMain extends JPanel {
                     }
                 }
 
-                if (attacking) {
+                if (attacking || fortifying) {
                     if (focused == null) {
-
                         for (Country c : countries) {
                             if (c != null && c.getOwner() == activePlayer) {
                                 if (c.isClicked(new Point(e.getX(), e.getY()))) {
                                     focused = c;
-                                    System.out.println(focused);
-
                                 }
                             }
                         }
@@ -559,10 +648,18 @@ public class RiskMain extends JPanel {
 
                     if (focused != null) {
                         for (Country c : countries) {
-                            if (c != null && c.getOwner() != activePlayer) {
-                                if (c.isClicked(new Point(e.getX(), e.getY()))) {
-                                    target = c;
-                                    System.out.println(target);
+                            if (c != null) {
+                                if (c.getOwner() != activePlayer && attacking) {
+                                    if (c.isClicked(new Point(e.getX(), e.getY()))) {
+                                        target = c;
+                                    }
+                                }
+
+                                if (c.getOwner() == activePlayer && fortifying && c != focused) {
+                                    if (c.isClicked(new Point(e.getX(), e.getY()))) {
+                                        target = c;
+                                        fortify();
+                                    }
                                 }
                             }
                         }
@@ -570,9 +667,6 @@ public class RiskMain extends JPanel {
                         if (focused != null && target != null)
                             attack();
                     }
-
-
-
                 }
 
 //                    g2.fillRect(892, 750, 250, 100);
