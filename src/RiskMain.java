@@ -6,8 +6,7 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-// TODO: 6/13/19 fix attack when focused has less than target
-// TODO: 6/13/19 Keep track of number of troops each country has
+
 // TODO: 6/13/19 setup win scenario
 // TODO: 6/13/19 draw text and finish ui
  // TODO: 6/13/19 setup limitations on which countries can travel where
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 public class RiskMain extends JPanel {
     public static int WIDTH = 1440, HEIGHT = 900;
     private BufferedImage worldMapBackground, riskMap, bottomBar;
-    private boolean startMenu, setUp, deployRound, gameOn, reinforcing, attacking, fortifying;
+    private boolean startMenu, setUp, deployRound, gameOn, reinforcing, attacking, fortifying, gameOver;
     private JButton startButton;
     private ArrayList<Player> players;
     private Country[] countries;
@@ -31,6 +30,7 @@ public class RiskMain extends JPanel {
 
         turnCounter = 0;
         startMenu = true;
+        gameOver = false;
         setLayout(null);
         startButton = new JButton("");
         startButton.setBounds(width/2-50, height/2-25, 100 ,50);
@@ -86,7 +86,6 @@ public class RiskMain extends JPanel {
 
         }
 
-
         if (deployRound) {
             if (players.get(players.size() - 1).getRemainingRenforcements() < 1) {
                 deployRound = false;
@@ -96,7 +95,6 @@ public class RiskMain extends JPanel {
                 attacking = false;
                 fortifying = false;
             }
-
 
         }
 
@@ -131,11 +129,23 @@ public class RiskMain extends JPanel {
             g2.drawRect(546, 750, 250, 100);
             g2.drawRect(892, 750, 250, 100);
 
+            g2.setColor(Color.WHITE);
+            g2.drawString("REINFORCE", 300, 780);
+            g2.drawString("ATTACK", 646, 780);
+            g2.drawString("FORTIFY", 992, 780);
+
+
             g2.setColor(new Color(40, 40, 40, 255));
             g2.fillRect(30, 50, 60, 100);
 
             g2.setColor(Color.WHITE);
             g2.drawString("Troop Gain: " + activePlayer.getTroopGain(), 32, 110);
+            g2.drawString("Total Troops: " + activePlayer.getNumOfTroops(), 32, 130);
+
+            if (focused != null )
+                g2.drawString("Focused: " + focused.getName(), 400, 720);
+            if (target != null )
+                g2.drawString("Attacking: " + target.getName(), 600, 720);
 
         }
 
@@ -143,6 +153,16 @@ public class RiskMain extends JPanel {
         if (activePlayer != null) {
             g2.setColor(activePlayer.getColor());
             g2.fillRect(40, 40, 40, 40);
+        }
+
+        if (gameOver) {
+            if (activePlayer != null) {
+                g2.setColor(new Color(40, 40, 40, 220));
+                g2.fillRect(WIDTH / 2 - 100, HEIGHT / 2 - 50, 200, 100);
+                g2.setColor(activePlayer.getColor());
+                g2.drawRect(WIDTH / 2 - 100, HEIGHT / 2 - 50, 200, 100);
+                g2.drawString("Player " + activePlayer.getPlayerNu() + " wins the game", WIDTH / 2 - 80, HEIGHT / 2 - 20);
+            }
         }
 
         repaint();
@@ -157,6 +177,10 @@ public class RiskMain extends JPanel {
     }
 
     public void nextPlayer() {
+        if (players.size() == 1)
+            endGame();
+
+        reinforcing = true;
         activePlayer.setActive();
 
         for (int i = 0; i < players.size(); i++) {
@@ -167,7 +191,6 @@ public class RiskMain extends JPanel {
             if (turnCounter == players.size())
                 turnCounter = 0;
         }
-
 
         if (players.size() > 1 ) {
             if (turnCounter < players.size())
@@ -206,7 +229,7 @@ public class RiskMain extends JPanel {
         playerColors[5] = new Color(252, 0, 255);
 
         for (int i = 0; i < nu; i++) {
-            players.add(new Player());
+            players.add(new Player(i));
             players.get(i).setColor(playerColors[i]);
         }
 
@@ -242,7 +265,6 @@ public class RiskMain extends JPanel {
     }
 
     public void fortify() {
-        System.out.println(target);
         if (focused.getTroops() > 1) {
             target.setTroops(target.getTroops() + focused.getTroops() - 1);
             focused.setTroops(1);
@@ -251,32 +273,55 @@ public class RiskMain extends JPanel {
 
     }
 
+    public void endGame() {
+        gameOn = false;
+        gameOver = true;
+        fortifying = false;
+        attacking = false;
+
+
+    }
+
     public void attack() {
         Player defender = target.getOwner();
 
-        if (focused.getTroops() < target.getTroops()) {                         //Lose
-            focused.setTroops(1);
-            target.setTroops(target.getTroops() - focused.getTroops() + 1);
-        } else if (focused.getTroops() == target.getTroops()) {                 //Tie
+        if (focused.getTroops() < target.getTroops()) {//Lose
+            if (!fortifying) {
+                int focusedNu = focused.getTroops();
+                focused.setTroops(1);
+                target.setTroops(target.getTroops() - focusedNu + 1);
+            }
+        } else if (focused.getTroops() == target.getTroops()) {                     //Tie
             focused.setTroops(1);
             target.setTroops(1);
-        } else if (target.getTroops() == 0 && focused.getTroops() > 1) {
+
+        } else if (target.getTroops() == 0 && focused.getTroops() > 1) {      // take blank space
             target.setOwner(activePlayer);
             target.setTroops(focused.getTroops() - 1);
             focused.setTroops(1);
+
+            Country temp = target;
+            focused.getOwner().addOwnedCountries(target);
+            temp.getOwner().removeOwnedCountries(focused);
+
         } else if (focused.getTroops() == target.getTroops() + 1) {              //Destroy army but no advance
             target.setTroops((focused.getTroops() - target.getTroops()) - 1);
             focused.setTroops(1);
+
         } else if (focused.getTroops() > target.getTroops()) {            //win
-            System.out.println("lkajdsf");
             int focusedNu = focused.getTroops();
             focused.setTroops(1);
             target.setTroops((focusedNu - target.getTroops()) - 1);
             target.setOwner(activePlayer);
+
+            Country temp = target;
+            focused.getOwner().addOwnedCountries(target);
+            temp.getOwner().removeOwnedCountries(focused);
+
         }
 
         if (defender != null) {
-            if (!defender.isAlive()) {
+            if (defender.getOwnedCountries().size() == 0) {
                 for (Player p : players) {
                     if (p == defender) {
                         players.remove(defender);
@@ -629,7 +674,6 @@ public class RiskMain extends JPanel {
                             fortifying = true;
                         } else if (x > 892 && x < 1142 && !attacking) {
                             fortifying = false;
-                            reinforcing = true;
                             nextPlayer();
                         }
                     }

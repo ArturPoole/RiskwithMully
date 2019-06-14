@@ -9,14 +9,15 @@ public class Player {
     private int remainingRenforcements = 2;
     private boolean isDefending = true, active = false;
     private Color color;
+    private int playerNu;
 
 
-    public Player() {         ownedRegions = new ArrayList<>(); ownedCountries = new ArrayList<>(); }
+    public Player(int nuPlayer) {         ownedRegions = new ArrayList<>(); ownedCountries = new ArrayList<>(); playerNu = nuPlayer; }
 
 
 
     public boolean isAlive() {
-        return  (numOfTroops > 0);
+        return (ownedCountries.size() > 0);
     }
 
     public void setColor(Color c) {
@@ -48,6 +49,22 @@ public class Player {
             ownedRegions.remove(r);
     }
 
+    public ArrayList<Country> getOwnedCountries() {
+        return ownedCountries;
+    }
+
+    public void addOwnedCountries(Country c) {
+        if (!getOwnedCountries().contains(c))
+            ownedCountries.add(c);
+    }
+
+    public void removeOwnedCountries(Country c) {
+        if (getOwnedCountries().contains(c))
+            ownedCountries.remove(c);
+    }
+
+
+
     public int getTroopGain() {
         int additive = 0;
 
@@ -61,9 +78,6 @@ public class Player {
 
     }
 
-    public void addOwnedCountry(Country c) {ownedCountries.add(c);}
-    public void removeOwnedCountry(Country c) {ownedCountries.remove(c);}
-
     public int getRemainingRenforcements() {
         return remainingRenforcements;
     }
@@ -72,17 +86,7 @@ public class Player {
         remainingRenforcements = r;
     }
 
-    public boolean isDefending() {
-        return isDefending;
+    public int getPlayerNu() { return playerNu;
     }
-
-    public void setDefending(boolean defending) {
-        isDefending = defending;
-    }
-
-    public boolean getActive() {return active;}
-
-    public void setActive(boolean b) {active = b;}
-
 
 }
